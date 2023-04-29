@@ -21,6 +21,19 @@ class Snake extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDet
   Future<void> onLoad() async {
     await add(_background);
     await add(gameManager);
-    await add(gameManager);
+    setPlayer();
+  }
+
+
+  @override
+  void update(double dt) {
+    // camera.followComponent(player);
+
+    super.update(dt);
+  }
+
+  void setPlayer() {
+    player = Player(character: gameManager.character);
+    add(player);
   }
 }
