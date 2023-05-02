@@ -1,7 +1,10 @@
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:snake/game/snake.dart';
+import 'package:snake/game/sprites/followPlayer.dart';
+import 'package:snake/game/sprites/platform.dart';
 
 enum PlayerState { only }
 
@@ -27,12 +30,29 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
   final int movingTopInput = -1;
   final int movingBottomInput = 1;
   Vector2 _velocity = Vector2.zero();
+  final double _gravity = speed;
+
+  int remainLife = 5;
+  TextComponent remainLifeText = TextComponent(
+    anchor: Anchor.center,
+    position: Vector2(25, -20),
+    priority: 10,
+  );
+
+  void updateRemainLife(int num) {
+    print('$num : num');
+    print('$remainLife : remainLife');
+    remainLife += num;
+    remainLifeText.text = remainLife.toString();
+  }
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
     await add(CircleHitbox());
+    remainLifeText.text = '$remainLife';
+    add(remainLifeText);
 
     // Add a Player to the game: loadCharacterSprites
     await _loadCharacterSprites();
@@ -41,14 +61,14 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
     current = PlayerState.only;
   }
 
-
   @override
   void update(double dt) {
     _velocity.x = (_hAxisInput * speed);
     _velocity.y = (_vAxisInput * speed);
 
+    _velocity.y -= _gravity;
     position += _velocity * dt;
-    // print(position);
+    onHorizontal();
     super.update(dt);
   }
 
@@ -73,14 +93,63 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
       moveDown();
     }
 
+    if(keysPressed.contains(LogicalKeyboardKey.space)) {
+      gameRef.togglePauseState();
+    }
+
     return true;
+  }
+
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollision(intersectionPoints, other);
+
+    position.y += 90;
+
+    if (other is NormalPlatform) {
+      gameRef.gameManager.score.value++;
+      updateRemainLife(-1);
+
+      if (remainLife <= 0) {
+        gameRef.onLose();
+        return;
+      }
+      removeFollowPlayer();
+    }
+
+    if(other is ItemPlatform) {
+      updateRemainLife(other.count);
+
+      // follow 추가
+      for(var i=0; i<other.count; i++) {
+        addFollowPlayer();
+      }
+
+    }
+
+    return;
+  }
+
+  /// 가로 수평이동 시, 벽면 이동
+  void onHorizontal() {
+    final double horizontalCenter = size.x / 2;
+
+    // Add a Player to the game: Add infinite side boundaries logic
+    // 중앙-오른쪽
+    if (position.x < horizontalCenter) {
+      position.x = gameRef.size.x - (horizontalCenter);
+    }
+    // 중앙-왼쪽
+    if (position.x > gameRef.size.x - (horizontalCenter)) {
+      position.x = horizontalCenter;
+    }
   }
 
   Future<void> _loadCharacterSprites() async {
     final only = await gameRef.loadSprite('game/player/${character.name}.png');
 
     sprites = <PlayerState, Sprite>{
-      PlayerState.only : only
+      PlayerState.only: only,
     };
   }
 
@@ -102,5 +171,50 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
   void moveDown() {
     _vAxisInput = 0;
     _vAxisInput += movingBottomInput;
+  }
+
+  void reset() {
+    _velocity = Vector2.zero();
+    current = PlayerState.only;
+  }
+
+  void resetPosition() {
+    position = Vector2(
+      (gameRef.size.x - size.x) / 2,
+      (gameRef.size.y - size.y) / 2,
+    );
+  }
+
+  void setFollowPlayer() {
+    if(remainLife <= 0) return;
+
+    for(var i=1; i<remainLife; i++) {
+      addFollowPlayer();
+    }
+  }
+
+  void addFollowPlayer() {
+    SpriteGroupComponent followComp;
+    int index = 0;
+    if(gameRef.followPlayers.isEmpty) {
+      followComp = this;
+      index = 1;
+    }else {
+      followComp = gameRef.followPlayers.last;
+      index = gameRef.followPlayers.last.index + 1;
+    }
+
+    var followPlayer = FollowPlayer(
+      character: gameRef.gameManager.character,
+      index: index,
+      followComponent: followComp,
+    );
+
+    gameRef.followPlayers.add(followPlayer);
+    gameRef.add(followPlayer);
+  }
+  void removeFollowPlayer() {
+    var removeLast = gameRef.followPlayers.removeLast();
+    removeLast.removeFromParent();
   }
 }

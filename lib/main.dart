@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:snake/game/snake.dart';
 import 'package:snake/game/util/color_schemes.dart';
+import 'package:snake/game/widgets/game_overlay.dart';
+
+import 'game/widgets/game_over_overlay.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,11 +59,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             child: GameWidget(
               game: game,
-              // overlayBuilderMap: <String, Widget Function(BuildContext, Game)>{
-              //   'gameOverlay': (context, game) => GameOverlay(game),
-              //   'mainMenuOverlay': (context, game) => MainMenuOverlay(game),
-              //   'gameOverOverlay': (context, game) => GameOverOverlay(game),
-              // },
+              overlayBuilderMap: <String, Widget Function(BuildContext, Game)>{
+                'gameOverlay': (context, game) => GameOverlay(game),
+                // 'mainMenuOverlay': (context, game) => MainMenuOverlay(game),
+                'gameOverOverlay': (context, game) => GameOverOverlay(game),
+              },
             ),
           );
         }),
