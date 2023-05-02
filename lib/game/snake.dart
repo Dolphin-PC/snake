@@ -10,6 +10,7 @@ import 'package:snake/game/managers/level_manager.dart';
 import 'package:snake/game/managers/object_manager.dart';
 import 'package:snake/game/sprites/followPlayer.dart';
 import 'package:snake/game/sprites/player.dart';
+import 'package:snake/main.dart';
 
 class Snake extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDetection {
   Snake({super.children});
@@ -30,26 +31,23 @@ class Snake extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDet
 
     await add(gameManager);
     await add(levelManager);
-    overlays.add('gameOverlay');
+    overlays.add(Overlays.mainMenu.name);
 
-    startGame();
+    // startGame();
   }
 
   @override
   void update(double dt) {
-    if (gameManager.isGameOver) {
+    if (!gameManager.isPlaying) {
       return;
     }
 
-    if (gameManager.isPlaying) {
-      camera.worldBounds = Rect.fromLTRB(
-        0,
-        camera.position.y - screenBufferSpace,
-        camera.gameSize.x,
-        camera.position.y + _background.size.y,
-      );
-
-    }
+    camera.worldBounds = Rect.fromLTRB(
+      0,
+      camera.position.y - screenBufferSpace,
+      camera.gameSize.x,
+      camera.position.y + _background.size.y,
+    );
 
     super.update(dt);
   }
@@ -58,7 +56,6 @@ class Snake extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDet
     player = Player(character: gameManager.character);
     add(player);
     player.setFollowPlayer();
-
   }
 
   void togglePauseState() {
@@ -72,16 +69,19 @@ class Snake extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDet
   void onLose() {
     gameManager.state = GameState.gameOver;
     player.removeFromParent();
-    overlays.add('gameOverOverlay');
+    overlays.add(Overlays.gameOver.name);
   }
 
   void resetGame() {
     startGame();
-    overlays.remove('gameOverOverlay');
+    overlays.remove(Overlays.gameOver.name);
   }
 
   void startGame() {
     initializeGameStart();
+
+    overlays.remove(Overlays.mainMenu.name);
+    overlays.add(Overlays.game.name);
     gameManager.state = GameState.playing;
   }
 

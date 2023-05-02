@@ -89,7 +89,7 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
       moveDown();
     }
 
-    if(keysPressed.contains(LogicalKeyboardKey.space)) {
+    if (keysPressed.contains(LogicalKeyboardKey.space)) {
       gameRef.togglePauseState();
     }
 
@@ -113,14 +113,19 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
       removeFollowPlayer();
     }
 
-    if(other is ItemPlatform) {
-      updateRemainLife(other.count);
+    if (other is ItemPlatform) {
+      if (other.itemPlatformState == ItemPlatformState.life) {
+        updateRemainLife(other.count);
 
-      // follow 추가
-      for(var i=0; i<other.count; i++) {
-        addFollowPlayer();
+        // follow 추가
+        for (var i = 0; i < other.count; i++) {
+          addFollowPlayer();
+        }
       }
 
+      if (other.itemPlatformState == ItemPlatformState.star) {
+        gameRef.gameManager.star?.value++;
+      }
     }
 
     return;
@@ -182,9 +187,9 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
   }
 
   void setFollowPlayer() {
-    if(remainLife <= 0) return;
+    if (remainLife <= 0) return;
 
-    for(var i=1; i<remainLife; i++) {
+    for (var i = 1; i < remainLife; i++) {
       addFollowPlayer();
     }
   }
@@ -192,10 +197,10 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
   void addFollowPlayer() {
     SpriteGroupComponent followComp;
     int index = 0;
-    if(gameRef.followPlayers.isEmpty) {
+    if (gameRef.followPlayers.isEmpty) {
       followComp = this;
       index = 1;
-    }else {
+    } else {
       followComp = gameRef.followPlayers.last;
       index = gameRef.followPlayers.last.index + 1;
     }
@@ -209,6 +214,7 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
     gameRef.followPlayers.add(followPlayer);
     gameRef.add(followPlayer);
   }
+
   void removeFollowPlayer() {
     var removeLast = gameRef.followPlayers.removeLast();
     removeLast.removeFromParent();

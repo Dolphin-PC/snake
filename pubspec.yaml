@@ -14,6 +14,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   flame: ^1.7.3
   google_fonts: ^4.0.3
+  shared_preferences: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -30,4 +31,5 @@ flutter:
     - assets/images/game/block/Planets/
     - assets/images/game/block/Parts/
     - assets/images/game/background/
+    - assets/images/game/item/
 

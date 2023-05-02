@@ -6,6 +6,7 @@ import 'package:snake/game/util/color_schemes.dart';
 import 'package:snake/game/widgets/game_overlay.dart';
 
 import 'game/widgets/game_over_overlay.dart';
+import 'game/widgets/main_menu_overlay.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,7 +46,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,9 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
             child: GameWidget(
               game: game,
               overlayBuilderMap: <String, Widget Function(BuildContext, Game)>{
-                'gameOverlay': (context, game) => GameOverlay(game),
-                // 'mainMenuOverlay': (context, game) => MainMenuOverlay(game),
-                'gameOverOverlay': (context, game) => GameOverOverlay(game),
+                Overlays.game.name: (context, game) => GameOverlay(game),
+                Overlays.mainMenu.name: (context, game) => MainMenuOverlay(game),
+                Overlays.gameOver.name: (context, game) => GameOverOverlay(game),
               },
             ),
           );
@@ -71,3 +71,5 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+enum Overlays { game, mainMenu, gameOver }

@@ -34,6 +34,15 @@ class ScoreDisplay extends StatelessWidget {
             );
           },
         ),
+        ValueListenableBuilder(
+          valueListenable: (game as Snake).gameManager.star!,
+          builder: (context, value, child) {
+            return Text(
+              'Star: $value',
+              style: Theme.of(context).textTheme.displaySmall!,
+            );
+          },
+        ),
       ],
     );
   }

@@ -67,10 +67,12 @@ class NormalPlatform extends Platform<NormalPlatformState> {
   }
 }
 
-enum ItemPlatformState { point, star }
+enum ItemPlatformState { life, star }
 
 class ItemPlatform extends Platform<ItemPlatformState> {
-  ItemPlatform({super.position});
+  ItemPlatform({super.position, required this.itemPlatformState});
+
+  ItemPlatformState itemPlatformState;
 
   int count = 1;
   TextComponent countText = TextComponent(
@@ -84,16 +86,22 @@ class ItemPlatform extends Platform<ItemPlatformState> {
     await super.onLoad();
 
     sprites = {
-      ItemPlatformState.point: await gameRef.loadSprite('game/player/spaceShips_002.png'),
+      ItemPlatformState.life: await gameRef.loadSprite('game/player/spaceShips_002.png'),
+      ItemPlatformState.star: await gameRef.loadSprite('game/item/star.png'),
     };
 
-    current = ItemPlatformState.point;
-
+    current = itemPlatformState;
     size = Vector2(50, 50);
 
-    count = Random().nextInt(gameRef.levelManager.level.value) + 1;
-    countText.text = '$count';
-    add(countText);
+    addLifeItemText();
+  }
+
+  addLifeItemText() {
+    if (itemPlatformState == ItemPlatformState.life) {
+      count = Random().nextInt(gameRef.levelManager.level.value) + 1;
+      countText.text = '$count';
+      add(countText);
+    }
   }
 
   @override
