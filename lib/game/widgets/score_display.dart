@@ -6,7 +6,6 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:snake/game/snake.dart';
 
-
 class ScoreDisplay extends StatelessWidget {
   const ScoreDisplay({super.key, required this.game, this.isLight = false});
 
@@ -15,12 +14,27 @@ class ScoreDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: (game as Snake).gameManager.score,
-      builder: (context, value, child) {
-        return Text('Score: $value',
-            style: Theme.of(context).textTheme.displaySmall!);
-      },
+    return Column(
+      children: [
+        ValueListenableBuilder(
+          valueListenable: (game as Snake).gameManager.score,
+          builder: (context, value, child) {
+            return Text(
+              'Score: $value',
+              style: Theme.of(context).textTheme.displaySmall!,
+            );
+          },
+        ),
+        ValueListenableBuilder(
+          valueListenable: (game as Snake).levelManager.level,
+          builder: (context, value, child) {
+            return Text(
+              'Level: $value',
+              style: Theme.of(context).textTheme.displaySmall!,
+            );
+          },
+        ),
+      ],
     );
   }
 }

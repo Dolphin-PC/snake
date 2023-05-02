@@ -47,7 +47,7 @@ class NormalPlatform extends Platform<NormalPlatformState> {
 
     size = Vector2(100, 100);
 
-    count = Random().nextInt(gameRef.levelManager.level) + 1;
+    count = Random().nextInt(gameRef.levelManager.level.value) + 1;
     countText.text = '$count';
     add(countText);
   }
@@ -91,7 +91,7 @@ class ItemPlatform extends Platform<ItemPlatformState> {
 
     size = Vector2(50, 50);
 
-    count = Random().nextInt(gameRef.levelManager.level) + 1;
+    count = Random().nextInt(gameRef.levelManager.level.value) + 1;
     countText.text = '$count';
     add(countText);
   }

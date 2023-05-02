@@ -20,11 +20,16 @@ class GameManager extends Component with HasGameRef<Snake> {
 
   void reset() {
     score.value = 0;
+    gameRef.levelManager.
     state = GameState.intro;
   }
 
   void increaseScore() {
     score.value++;
+
+    if(gameRef.levelManager.shouldLevelUp(score: score.value)) {
+      gameRef.levelManager.increaseLevel();
+    }
   }
 
 }

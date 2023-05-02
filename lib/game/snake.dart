@@ -28,9 +28,9 @@ class Snake extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDet
   Future<void> onLoad() async {
     await add(_background);
 
-    overlays.add('gameOverlay');
     await add(gameManager);
     await add(levelManager);
+    overlays.add('gameOverlay');
 
     startGame();
   }

@@ -24,13 +24,11 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
 
   int _hAxisInput = 0;
   int _vAxisInput = 0;
-  static const speed = 300.0;
   final int movingLeftInput = -1;
   final int movingRightInput = 1;
   final int movingTopInput = -1;
   final int movingBottomInput = 1;
   Vector2 _velocity = Vector2.zero();
-  final double _gravity = speed;
 
   int remainLife = 5;
   TextComponent remainLifeText = TextComponent(
@@ -40,8 +38,6 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
   );
 
   void updateRemainLife(int num) {
-    print('$num : num');
-    print('$remainLife : remainLife');
     remainLife += num;
     remainLifeText.text = remainLife.toString();
   }
@@ -63,10 +59,10 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
 
   @override
   void update(double dt) {
-    _velocity.x = (_hAxisInput * speed);
-    _velocity.y = (_vAxisInput * speed);
+    _velocity.x = (_hAxisInput * gameRef.levelManager.speed);
+    _velocity.y = (_vAxisInput * gameRef.levelManager.speed);
 
-    _velocity.y -= _gravity;
+    _velocity.y -= gameRef.levelManager.speed;
     position += _velocity * dt;
     onHorizontal();
     super.update(dt);
@@ -107,7 +103,7 @@ class Player extends SpriteGroupComponent<PlayerState> with HasGameRef<Snake>, K
     position.y += 90;
 
     if (other is NormalPlatform) {
-      gameRef.gameManager.score.value++;
+      gameRef.gameManager.increaseScore();
       updateRemainLife(-1);
 
       if (remainLife <= 0) {
