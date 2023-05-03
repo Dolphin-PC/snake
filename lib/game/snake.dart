@@ -108,10 +108,5 @@ class Snake extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDet
     objectManager = ObjectManager();
     add(objectManager);
 
-    // levelManager.reset();
-
-    // Core gameplay: Reset player & camera boundaries
-
-    // Add a Player to the game: Reset Dash's position back to the start
   }
 }

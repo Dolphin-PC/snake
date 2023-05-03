@@ -4,6 +4,8 @@
 
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:snake/game/widgets/buttons.dart';
+import 'package:snake/main.dart';
 
 import '../snake.dart';
 import 'score_display.dart';
@@ -37,18 +39,24 @@ class GameOverOverlay extends StatelessWidget {
               const SizedBox(
                 height: 50,
               ),
-              ElevatedButton(
+              Buttons.titleButton(
+                context: context,
                 onPressed: () {
                   (game as Snake).resetGame();
                 },
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(
-                    const Size(200, 75),
-                  ),
-                  textStyle: MaterialStateProperty.all(
-                      Theme.of(context).textTheme.titleLarge),
-                ),
-                child: const Text('Play Again'),
+                text: "Play Again",
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Buttons.titleButton(
+                context: context,
+                onPressed: () {
+                  game.overlays.add(Overlays.mainMenu.name);
+                  game.overlays.remove(Overlays.gameOver.name);
+
+                },
+                text: "Main Menu",
               ),
             ],
           ),
