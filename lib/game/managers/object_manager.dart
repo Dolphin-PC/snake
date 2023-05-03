@@ -18,9 +18,9 @@ class ObjectManager extends Component with HasGameRef<Snake> {
   double maxVerticalDistanceToNextPlatform;
   final double _tallestPlatformHeight = 50;
   final probGen = ProbabilityGenerator();
-  final List<NormalPlatform> normalPlatforms = [];
-  final List<ItemPlatform> lifeItemPlatforms = [];
-  final List<ItemPlatform> starItemPlatforms = [];
+  final List<Platform> normalPlatforms = [];
+  final List<Platform> lifeItemPlatforms = [];
+  final List<Platform> starItemPlatforms = [];
   double lastPositionY = 0.0;
   late int line100count = 0;
 
@@ -34,45 +34,42 @@ class ObjectManager extends Component with HasGameRef<Snake> {
     super.onLoad();
     line100count = (gameRef.camera.gameSize.x / 100).ceil();
 
-    addLineNormalPlatform(-gameRef.player.position.y);
-    addItemPlatform(-gameRef.camera.position.y);
-    addStarPlatform(-gameRef.camera.position.y);
+    normalPlatforms.clear();
+    lifeItemPlatforms.clear();
+    starItemPlatforms.clear();
 
-    addLineNormalPlatform(_generateNormalNextY());
-    addItemPlatform(_getItemNextY(lifeItemPlatforms));
+    addLineNormalPlatform(0.0);
+    addLifeItemPlatform(0 - gameRef.size.y / 2);
+    addStarPlatform(0 - gameRef.size.y / 2);
+
+    addLineNormalPlatform(_getPlatformNextY(normalPlatforms));
+    addLifeItemPlatform(_getPlatformNextY(lifeItemPlatforms));
   }
 
   @override
   void update(double dt) {
-    final topOfLowestNormalPlatform = normalPlatforms.first.position.y;
-    final topOfLowestItemPlatform = lifeItemPlatforms.first.position.y;
-    final starItemFirstPosY = starItemPlatforms.first.position.y;
+    double screenBottom = gameRef.player.position.y + (gameRef.size.y / 2) + gameRef.screenBufferSpace;
 
-    final screenBottom = gameRef.player.position.y + (gameRef.size.x / 2) + gameRef.screenBufferSpace;
-
-    if (topOfLowestNormalPlatform > screenBottom) {
-      addLineNormalPlatform(_generateNormalNextY());
-      _cleanNormalPlatforms();
+    if (normalPlatforms.length < 3 * line100count) {
+      addLineNormalPlatform(_getPlatformNextY(normalPlatforms));
     }
+    _cleanPlatforms(normalPlatforms, posY: screenBottom);
 
-    if (topOfLowestItemPlatform > gameRef.player.position.y) {
-      addItemPlatform(_getItemNextY(lifeItemPlatforms));
-      _cleanItemPlatform(lifeItemPlatforms);
+    if (lifeItemPlatforms.length < 3) {
+      addLifeItemPlatform(_getPlatformNextY(lifeItemPlatforms));
     }
+    _cleanPlatforms(lifeItemPlatforms, posY: screenBottom);
 
-    if (starItemPosY > gameRef.player.position.y) {
-      print(starItemPosY);
-      print(gameRef.player.position.y);
-      if (probGen.generateWithProbability(50)) {
-        addStarPlatform(_getItemNextY(starItemPlatforms));
-        _cleanItemPlatform(starItemPlatforms);
-      } else {
-        starItemPosY -= gameRef.camera.position.y;
-      }
+    if (starItemPlatforms.length < 3 && gameRef.gameManager.score.value % 5 == 0) {
+      addStarPlatform(_getPlatformNextY(starItemPlatforms));
     }
+    _cleanPlatforms(starItemPlatforms, posY: screenBottom);
+
+
 
     super.update(dt);
   }
+
 
   void addLineNormalPlatform(double posY) {
     List<Vector2> positionList = generateNextLinePosition(posY);
@@ -83,10 +80,13 @@ class ObjectManager extends Component with HasGameRef<Snake> {
     }
   }
 
-  void addItemPlatform(double posY) {
+  void addLifeItemPlatform(double posY) {
     double x = Random().nextInt(line100count) * 100;
 
-    ItemPlatform lifeItemPlatform = ItemPlatform(position: Vector2(x, posY), itemPlatformState: ItemPlatformState.life);
+    ItemPlatform lifeItemPlatform = ItemPlatform(
+      position: Vector2(x, posY),
+      itemPlatformState: ItemPlatformState.life,
+    );
     lifeItemPlatforms.add(lifeItemPlatform);
     add(lifeItemPlatform);
   }
@@ -114,27 +114,26 @@ class ObjectManager extends Component with HasGameRef<Snake> {
     return resultList;
   }
 
-  double _generateNormalNextY() {
-    final currentHighestPlatformY = normalPlatforms.last.position.y;
-    return currentHighestPlatformY - gameRef.camera.gameSize.y;
-  }
+  double _getPlatformNextY(List<Platform> itemList) {
+    if(itemList.isEmpty) {
+      return gameRef.camera.position.y - gameRef.screenBufferSpace;
+    }
 
-  double _getItemNextY(List<ItemPlatform> itemList) {
     final currentHighestItemPlatformY = itemList.last.position.y;
-    int rand = Random().nextInt(gameRef.screenBufferSpace);
-    int rand2 = Random().nextInt(gameRef.screenBufferSpace);
-    return currentHighestItemPlatformY - gameRef.camera.gameSize.y + rand - rand2;
+    return currentHighestItemPlatformY - gameRef.camera.gameSize.y;
   }
 
-  void _cleanNormalPlatforms() {
-    var firstPlatform = normalPlatforms[0];
-    normalPlatforms.removeWhere((element) {
-      if (element.position.y == firstPlatform.position.y) {
-        element.removeFromParent();
-        return true;
-      }
-      return false;
-    });
+  void _cleanPlatforms(List<Platform> platforms, {required double posY}) {
+    if (platforms.isNotEmpty) {
+      platforms.removeWhere((element) {
+        // print(element.position.y > posY);
+        if (element.position.y > posY) {
+          element.removeFromParent();
+          return true;
+        }
+        return false;
+      });
+    }
   }
 
   void _cleanItemPlatform(List<ItemPlatform> itemList) {
